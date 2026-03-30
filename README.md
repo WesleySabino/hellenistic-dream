@@ -1,75 +1,53 @@
 # Hellenistic Dream
 
-Hellenistic Dream é uma aplicação web local-first para acompanhar a evolução corporal do usuário e indicar, de forma simples, se a direção mais apropriada no momento é:
+Scaffold inicial do **Hellenistic Dream**: aplicação web mobile-first, local-first e sem backend remoto.
 
-- BULK
-- CUT
-- LIVRE ESCOLHA
+## Stack
 
-## Objetivo do produto
-
-A aplicação foi pensada para uso conjunto entre usuário e personal trainer.
-Ela deve funcionar muito bem em navegador de celular, com linguagem simples e visual clara.
-
-## Restrições obrigatórias
-
-- Sem backend remoto
-- Sem autenticação
-- Sem conta de usuário
-- Nenhum dado corporal deve ser enviado ao servidor
-- Todos os dados do usuário ficam armazenados localmente no navegador
-- O site remoto só entrega a interface e o código; o cálculo ocorre localmente no cliente
-
-## Prioridades de UX
-
-- Mobile-first
-- Interface clara para leigos
-- Gráficos simples
-- Linguagem não médica
-- Fluxo rápido para registrar peso diário
-- Fluxo simples para registrar cintura semanal
-
-## Fonte de verdade do projeto
-
-Leia estes arquivos antes de qualquer implementação:
-
-1. `docs/FULL_SPEC.md`
-2. `docs/PROJECT_BRIEF.md`
-3. `docs/DECISION_RULES.md`
-
-## Escopo do MVP
-
-- onboarding inicial
-- dashboard principal
-- registro diário de peso
-- registro semanal de cintura
-- cálculo de recomendação BULK / CUT / LIVRE ESCOLHA
-- histórico visual
-- exportação e importação local de dados
-- funcionamento sem backend
-
-## Stack desejado
-
-Preferência inicial:
-- React
+- React 18
 - TypeScript
-- mobile-first
-- arquitetura simples
-- armazenamento local encapsulado
-- componentes pequenos e legíveis
-- lógica de negócio separada da UI
+- Vite
 
-## Regras para o agente
+## O que já existe
 
-- Leia a documentação antes de editar código
-- Trabalhe por etapas pequenas
-- Não implemente backend
-- Não adicione autenticação
-- Não envie dados do usuário para APIs remotas
-- Separe regra de negócio da camada de componentes
-- Escreva código legível e fácil de manter
-- Sempre documente como rodar localmente
+- Navegação entre telas principais:
+  - Dashboard
+  - Check-in
+  - Histórico
+  - Perfil
+- Persistência local no navegador com `localStorage`
+- Lógica inicial de recomendação (`CUT`, `BULK`, `LIVRE ESCOLHA`) baseada em WHtR e gordura corporal opcional
+- Layout mobile-first e interface simples
+- Sem autenticação
+- Sem backend
 
-## Critério geral de qualidade
+## Como rodar localmente
 
-O projeto deve ser simples o bastante para um desenvolvedor individual manter, mas organizado o bastante para crescer depois.
+### Pré-requisitos
+
+- Node.js 20+ (recomendado)
+- npm 10+ (ou equivalente)
+
+### Passos
+
+```bash
+npm install
+npm run dev
+```
+
+Abra o endereço mostrado no terminal (normalmente `http://localhost:5173`).
+
+## Build de produção
+
+```bash
+npm run build
+npm run preview
+```
+
+## Persistência local
+
+Os dados ficam salvos no navegador do usuário em:
+
+- chave `hellenistic-dream/state/v1` do `localStorage`
+
+Nenhum dado corporal é enviado para backend.

@@ -1,0 +1,128 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #1c2333;
+  background-color: #f3f5f9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  max-width: 768px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: 1rem;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  position: sticky;
+  top: 0;
+  background: #f3f5f9;
+  padding: 0.5rem 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: none;
+  background: #364fc7;
+  color: white;
+  border-radius: 0.75rem;
+  padding: 0.7rem;
+}
+
+button.active {
+  background: #1c2f80;
+}
+
+button.ghost {
+  margin-top: 1rem;
+  width: 100%;
+  background: #e6e9f7;
+  color: #1c2f80;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+.label,
+.muted {
+  color: #5f6881;
+  font-size: 0.92rem;
+}
+
+.card,
+.recommendation {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 6px 18px rgba(27, 36, 67, 0.08);
+  margin-bottom: 0.8rem;
+}
+
+.recommendation.is-cut {
+  border-left: 6px solid #d94848;
+}
+
+.recommendation.is-bulk {
+  border-left: 6px solid #0f9b8e;
+}
+
+.recommendation.is-free {
+  border-left: 6px solid #e3aa00;
+}
+
+.metrics-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.stack {
+  display: grid;
+  gap: 0.7rem;
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+
+input,
+select {
+  border: 1px solid #d2d8ea;
+  border-radius: 0.65rem;
+  background: #fff;
+  padding: 0.6rem;
+}
+
+ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+@media (min-width: 640px) {
+  .app-shell {
+    padding: 1.5rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
