@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { CheckInScreen } from './components/CheckInScreen';
 import { Dashboard } from './components/Dashboard';
 import { HistoryScreen } from './components/HistoryScreen';
+import { OnboardingScreen } from './components/OnboardingScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import type { DailyWeightEntry, UserProfile, WeeklyCheckIn } from './domain/types';
 import { localStateRepository } from './state/storage';
@@ -35,6 +36,34 @@ export function App() {
     setTab('dashboard');
   };
 
+  const completeOnboarding = (payload: {
+    profile: UserProfile;
+    initialWeightKg: number;
+    initialMeasurement: WeeklyCheckIn;
+  }) => {
+    setState(
+      localStateRepository.completeOnboarding({
+        profile: payload.profile,
+        dailyWeight: {
+          date: payload.initialMeasurement.date,
+          weightKg: payload.initialWeightKg
+        },
+        weeklyMeasurement: payload.initialMeasurement
+      })
+    );
+    setTab('dashboard');
+  };
+
+  const needsOnboarding = !state.profile || state.dailyWeights.length === 0 || state.weeklyMeasurements.length === 0;
+
+  if (needsOnboarding) {
+    return (
+      <main className="app-shell">
+        <OnboardingScreen onComplete={completeOnboarding} />
+      </main>
+    );
+  }
+
   return (
     <main className="app-shell">
       <nav className="tabs" aria-label="Navegação principal">
@@ -58,7 +87,7 @@ export function App() {
       {tab === 'profile' && <ProfileScreen profile={state.profile} onSave={saveProfile} />}
 
       <button className="ghost" onClick={() => setState(localStateRepository.reset())}>
-        Restaurar dados de desenvolvimento
+        Limpar dados locais e reiniciar onboarding
       </button>
     </main>
   );

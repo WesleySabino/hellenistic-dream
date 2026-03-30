@@ -112,6 +112,17 @@ select {
   padding: 0.6rem;
 }
 
+.validation-box {
+  border: 1px solid #f6c8c8;
+  background: #fff3f3;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.onboarding-shell {
+  padding-top: 0.5rem;
+}
+
 ul {
   margin: 0;
   padding-left: 1.2rem;
