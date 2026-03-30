@@ -1,12 +1,4 @@
-import type { AppState, Confidence, Recommendation, Sex } from './types';
-
-interface RecommendationResult {
-  recommendation: Recommendation;
-  reason: string;
-  whtr: number | null;
-  confidence: Confidence;
-  avgWeight7d: number | null;
-}
+import type { CalculatedState, Confidence, DomainState, Recommendation, Sex, Trend } from './types';
 
 function average(values: number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -24,23 +16,32 @@ function decideByBodyFat(sex: Sex, bodyFatPct: number): Recommendation {
   return 'LIVRE ESCOLHA';
 }
 
-function confidenceForState(state: AppState): Confidence {
+function confidenceForState(state: DomainState): Confidence {
   const dailyCount = state.dailyWeights.length;
-  const weeklyCount = state.weeklyCheckIns.length;
+  const weeklyCount = state.weeklyMeasurements.length;
 
   if (dailyCount >= 28 && weeklyCount >= 4) return 'Alta';
   if (dailyCount >= 7 && weeklyCount >= 2) return 'Moderada';
   return 'Baixa';
 }
 
-export function getRecommendation(state: AppState): RecommendationResult {
-  const lastCheckIn = state.weeklyCheckIns[state.weeklyCheckIns.length - 1];
+function trendForNumbers(values: number[]): Trend | null {
+  if (values.length < 2) return null;
+  const diff = values[values.length - 1] - values[0];
+  if (Math.abs(diff) < 0.2) return 'estavel';
+  return diff > 0 ? 'subindo' : 'caindo';
+}
+
+export function getRecommendation(state: DomainState): CalculatedState {
+  const lastCheckIn = state.weeklyMeasurements[state.weeklyMeasurements.length - 1];
   const avgWeight7d =
     state.dailyWeights.length === 0
       ? null
       : average(state.dailyWeights.slice(-7).map((entry) => entry.weightKg));
 
   const confidence = confidenceForState(state);
+  const weightTrend = trendForNumbers(state.dailyWeights.slice(-7).map((entry) => entry.weightKg));
+  const waistTrend = trendForNumbers(state.weeklyMeasurements.slice(-4).map((entry) => entry.waistCm));
 
   if (!state.profile || !lastCheckIn) {
     return {
@@ -49,7 +50,11 @@ export function getRecommendation(state: AppState): RecommendationResult {
         'Ainda faltam registros para uma leitura mais confiável. Continue preenchendo seu peso diário e sua cintura semanal.',
       whtr: null,
       confidence,
-      avgWeight7d
+      avgWeight7d,
+      latestWaistCm: lastCheckIn?.waistCm ?? null,
+      latestBodyFatPct: lastCheckIn?.bodyFatPct ?? null,
+      weightTrend,
+      waistTrend
     };
   }
 
@@ -58,22 +63,28 @@ export function getRecommendation(state: AppState): RecommendationResult {
   if (whtr >= 0.5) {
     return {
       recommendation: 'CUT',
-      reason:
-        'Sua cintura está acima da zona considerada confortável em relação à sua altura.',
+      reason: 'Sua cintura está acima da zona considerada confortável em relação à sua altura.',
       whtr,
       confidence,
-      avgWeight7d
+      avgWeight7d,
+      latestWaistCm: lastCheckIn.waistCm,
+      latestBodyFatPct: lastCheckIn.bodyFatPct ?? null,
+      weightTrend,
+      waistTrend
     };
   }
 
   if (whtr < 0.4) {
     return {
       recommendation: 'BULK',
-      reason:
-        'Sua relação cintura/altura está em faixa baixa para priorizar ganho de massa.',
+      reason: 'Sua relação cintura/altura está em faixa baixa para priorizar ganho de massa.',
       whtr,
       confidence,
-      avgWeight7d
+      avgWeight7d,
+      latestWaistCm: lastCheckIn.waistCm,
+      latestBodyFatPct: lastCheckIn.bodyFatPct ?? null,
+      weightTrend,
+      waistTrend
     };
   }
 
@@ -87,7 +98,11 @@ export function getRecommendation(state: AppState): RecommendationResult {
           : 'A leitura de gordura corporal ajudou a definir a direção nesta faixa intermediária.',
       whtr,
       confidence,
-      avgWeight7d
+      avgWeight7d,
+      latestWaistCm: lastCheckIn.waistCm,
+      latestBodyFatPct: lastCheckIn.bodyFatPct,
+      weightTrend,
+      waistTrend
     };
   }
 
@@ -97,6 +112,10 @@ export function getRecommendation(state: AppState): RecommendationResult {
       'Seus indicadores estão em faixa intermediária e sem gordura corporal recente. A direção está livre para decidir com seu treinador.',
     whtr,
     confidence,
-    avgWeight7d
+    avgWeight7d,
+    latestWaistCm: lastCheckIn.waistCm,
+    latestBodyFatPct: null,
+    weightTrend,
+    waistTrend
   };
 }

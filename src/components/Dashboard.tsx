@@ -7,7 +7,7 @@ interface DashboardProps {
 
 export function Dashboard({ state }: DashboardProps) {
   const { recommendation, reason, whtr, confidence, avgWeight7d } = getRecommendation(state);
-  const lastCheckIn = state.weeklyCheckIns[state.weeklyCheckIns.length - 1];
+  const lastCheckIn = state.weeklyMeasurements[state.weeklyMeasurements.length - 1];
   const colorClass =
     recommendation === 'CUT' ? 'is-cut' : recommendation === 'BULK' ? 'is-bulk' : 'is-free';
 
