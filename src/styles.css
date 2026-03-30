@@ -28,6 +28,7 @@ body {
   top: 0;
   background: #f3f5f9;
   padding: 0.5rem 0;
+  z-index: 10;
 }
 
 button,
@@ -76,6 +77,16 @@ p {
   margin-bottom: 0.8rem;
 }
 
+.hero h2 {
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  margin-bottom: 0.5rem;
+}
+
+.hero .reason {
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
 .recommendation.is-cut {
   border-left: 6px solid #d94848;
 }
@@ -91,6 +102,33 @@ p {
 .metrics-grid {
   display: grid;
   gap: 0.8rem;
+}
+
+.trend-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mini-bars {
+  height: 62px;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2rem;
+  padding-top: 0.3rem;
+}
+
+.mini-bars span {
+  display: block;
+  flex: 1;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #6f8cff 0%, #364fc7 100%);
+  min-width: 4px;
+}
+
+.mini-empty {
+  color: #6d748a;
+  font-size: 0.92rem;
+  margin: 0;
 }
 
 .stack {
