@@ -28,10 +28,10 @@ export function HistoryScreen({ state }: HistoryScreenProps) {
       <article className="card">
         <h2>Cintura recente</h2>
         <ul>
-          {state.weeklyCheckIns.length === 0 ? (
+          {state.weeklyMeasurements.length === 0 ? (
             <li>Nenhum registro ainda.</li>
           ) : (
-            [...state.weeklyCheckIns].reverse().slice(0, 10).map((entry) => (
+            [...state.weeklyMeasurements].reverse().slice(0, 10).map((entry) => (
               <li key={`${entry.date}-${entry.waistCm}`}>
                 {entry.date}: {entry.waistCm.toFixed(1)} cm
                 {typeof entry.bodyFatPct === 'number' ? ` | Gordura: ${entry.bodyFatPct.toFixed(1)}%` : ''}
