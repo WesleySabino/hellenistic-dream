@@ -37,6 +37,7 @@ export interface DomainState {
 export interface CalculatedState {
   recommendation: Recommendation;
   reason: string;
+  explanation: string[];
   confidence: Confidence;
   whtr: number | null;
   avgWeight7d: number | null;
