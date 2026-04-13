@@ -1,20 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { calculateAverageWeight7d } from '../domain/decision';
 import type { DailyWeightEntry, WeeklyCheckIn } from '../domain/types';
 
 interface CheckInScreenProps {
   onAddDaily(entry: DailyWeightEntry): void;
   onAddWeekly(entry: WeeklyCheckIn): void;
+  dailyWeights: DailyWeightEntry[];
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function CheckInScreen({ onAddDaily, onAddWeekly }: CheckInScreenProps) {
+export function CheckInScreen({ onAddDaily, onAddWeekly, dailyWeights }: CheckInScreenProps) {
   const [dailyDate, setDailyDate] = useState(today());
   const [weightKg, setWeightKg] = useState(80);
+  const [dailySuccessMessage, setDailySuccessMessage] = useState('');
 
   const [weeklyDate, setWeeklyDate] = useState(today());
   const [waistCm, setWaistCm] = useState(85);
   const [bodyFatPct, setBodyFatPct] = useState('');
+
+  const existingDailyEntry = useMemo(
+    () => dailyWeights.find((entry) => entry.date === dailyDate),
+    [dailyDate, dailyWeights]
+  );
+
+  useEffect(() => {
+    if (existingDailyEntry) {
+      setWeightKg(existingDailyEntry.weightKg);
+    }
+  }, [existingDailyEntry]);
+
+  const recentAvgWeight7d = useMemo(() => {
+    return calculateAverageWeight7d(dailyWeights.map((entry) => entry.weightKg));
+  }, [dailyWeights]);
 
   return (
     <section>
@@ -27,12 +45,26 @@ export function CheckInScreen({ onAddDaily, onAddWeekly }: CheckInScreenProps) {
           onSubmit={(event) => {
             event.preventDefault();
             onAddDaily({ date: dailyDate, weightKg });
+            setDailySuccessMessage('Peso salvo com sucesso. Média de 7 dias recalculada.');
           }}
         >
           <h2>Peso diário</h2>
           <label>
             Data
-            <input type="date" value={dailyDate} onChange={(e) => setDailyDate(e.target.value)} required />
+            <input
+              type="date"
+              value={dailyDate}
+              onChange={(e) => {
+                const nextDate = e.target.value;
+                setDailyDate(nextDate);
+                const entryForDate = dailyWeights.find((entry) => entry.date === nextDate);
+                if (entryForDate) {
+                  setWeightKg(entryForDate.weightKg);
+                }
+                setDailySuccessMessage('');
+              }}
+              required
+            />
           </label>
           <label>
             Peso (kg)
@@ -44,7 +76,15 @@ export function CheckInScreen({ onAddDaily, onAddWeekly }: CheckInScreenProps) {
               required
             />
           </label>
-          <button type="submit">Salvar peso</button>
+          {existingDailyEntry ? (
+            <p className="muted">Já existe peso nessa data. Salvar irá editar o registro do dia.</p>
+          ) : null}
+          {dailySuccessMessage ? <p className="success-feedback">{dailySuccessMessage}</p> : null}
+          <p className="muted">
+            Média atual de 7 dias:{' '}
+            {recentAvgWeight7d !== null ? `${recentAvgWeight7d.toFixed(1)} kg` : 'aguardando registros'}
+          </p>
+          <button type="submit">{existingDailyEntry ? 'Atualizar peso' : 'Salvar peso'}</button>
         </form>
 
         <form

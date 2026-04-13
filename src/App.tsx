@@ -22,13 +22,11 @@ export function App() {
   }, [state]);
 
   const addDailyWeight = (entry: DailyWeightEntry) => {
-    setState(localStateRepository.addDailyWeight(entry));
-    setTab('dashboard');
+    setState(localStateRepository.upsertDailyWeight(entry));
   };
 
   const addWeeklyCheckIn = (entry: WeeklyCheckIn) => {
     setState(localStateRepository.addWeeklyMeasurement(entry));
-    setTab('dashboard');
   };
 
   const saveProfile = (profile: UserProfile) => {
@@ -82,7 +80,13 @@ export function App() {
       </nav>
 
       {tab === 'dashboard' && <Dashboard state={sortedState} />}
-      {tab === 'checkin' && <CheckInScreen onAddDaily={addDailyWeight} onAddWeekly={addWeeklyCheckIn} />}
+      {tab === 'checkin' && (
+        <CheckInScreen
+          onAddDaily={addDailyWeight}
+          onAddWeekly={addWeeklyCheckIn}
+          dailyWeights={sortedState.dailyWeights}
+        />
+      )}
       {tab === 'history' && <HistoryScreen state={sortedState} />}
       {tab === 'profile' && <ProfileScreen profile={state.profile} onSave={saveProfile} />}
 
