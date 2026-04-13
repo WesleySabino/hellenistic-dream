@@ -180,6 +180,162 @@ ul {
   padding-left: 1.2rem;
 }
 
+.empty-state {
+  margin: 0;
+  color: #6d748a;
+}
+
+.chart-shell {
+  width: 100%;
+  height: 170px;
+  margin: 0.7rem 0 0.45rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e0e6f6;
+  background: linear-gradient(180deg, #fafcff 0%, #f3f7ff 100%);
+  overflow: hidden;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chart-line-primary,
+.chart-line-secondary {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-line-primary {
+  stroke: #3753d8;
+  stroke-width: 1.8;
+}
+
+.chart-line-secondary {
+  stroke: #00a393;
+  stroke-width: 1.4;
+  stroke-dasharray: 4 3;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  font-size: 0.9rem;
+  color: #526082;
+  margin-bottom: 0.6rem;
+}
+
+.legend-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 0.35rem;
+}
+
+.legend-dot.primary {
+  background: #3753d8;
+}
+
+.legend-dot.secondary {
+  background: #00a393;
+}
+
+.compact-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.timeline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.timeline-list li {
+  border: 1px solid #e4e8f5;
+  border-radius: 0.7rem;
+  padding: 0.6rem 0.7rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.timeline-badge {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  line-height: 1.2;
+}
+
+.timeline-cut {
+  background: #ffe8e8;
+  color: #ab2f2f;
+}
+
+.timeline-bulk {
+  background: #dff9f4;
+  color: #0c766b;
+}
+
+.timeline-free {
+  background: #fff5d7;
+  color: #906500;
+}
+
+.records-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.records-list li {
+  border: 1px solid #e4e8f5;
+  border-radius: 0.75rem;
+  padding: 0.65rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.ghost-inline,
+.danger-inline {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.ghost-inline {
+  background: #edf1ff;
+  color: #263d9b;
+}
+
+.danger-inline {
+  background: #ffe8e8;
+  color: #ab2f2f;
+}
+
+.inline-form {
+  width: 100%;
+  display: grid;
+  gap: 0.5rem;
+}
+
 @media (min-width: 640px) {
   .app-shell {
     padding: 1.5rem;

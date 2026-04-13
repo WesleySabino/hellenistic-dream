@@ -109,11 +109,35 @@ export const localStateRepository = {
   },
 
   addWeeklyMeasurement(entry: WeeklyMeasurement): DomainState {
+    return this.upsertWeeklyMeasurement(entry);
+  },
+
+  upsertWeeklyMeasurement(entry: WeeklyMeasurement): DomainState {
     const current = storage.read();
     const withoutSameDate = current.weeklyMeasurements.filter((item) => item.date !== entry.date);
     const next: DomainState = {
       ...current,
       weeklyMeasurements: [...withoutSameDate, entry].sort((a, b) => a.date.localeCompare(b.date))
+    };
+    storage.write(next);
+    return next;
+  },
+
+  deleteDailyWeight(date: string): DomainState {
+    const current = storage.read();
+    const next: DomainState = {
+      ...current,
+      dailyWeights: current.dailyWeights.filter((item) => item.date !== date)
+    };
+    storage.write(next);
+    return next;
+  },
+
+  deleteWeeklyMeasurement(date: string): DomainState {
+    const current = storage.read();
+    const next: DomainState = {
+      ...current,
+      weeklyMeasurements: current.weeklyMeasurements.filter((item) => item.date !== date)
     };
     storage.write(next);
     return next;

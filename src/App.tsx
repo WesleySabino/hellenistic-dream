@@ -30,6 +30,22 @@ export function App() {
     setState(localStateRepository.addWeeklyMeasurement(entry));
   };
 
+  const updateDailyWeight = (entry: DailyWeightEntry) => {
+    setState(localStateRepository.upsertDailyWeight(entry));
+  };
+
+  const updateWeeklyMeasurement = (entry: WeeklyCheckIn) => {
+    setState(localStateRepository.upsertWeeklyMeasurement(entry));
+  };
+
+  const deleteDailyWeight = (date: string) => {
+    setState(localStateRepository.deleteDailyWeight(date));
+  };
+
+  const deleteWeeklyMeasurement = (date: string) => {
+    setState(localStateRepository.deleteWeeklyMeasurement(date));
+  };
+
   const saveProfile = (profile: UserProfile) => {
     setState(localStateRepository.saveProfile(profile));
     setTab('dashboard');
@@ -94,7 +110,15 @@ export function App() {
           profile={state.profile!}
         />
       )}
-      {tab === 'history' && <HistoryScreen state={sortedState} />}
+      {tab === 'history' && (
+        <HistoryScreen
+          state={sortedState}
+          onUpdateDailyWeight={updateDailyWeight}
+          onDeleteDailyWeight={deleteDailyWeight}
+          onUpdateWeeklyMeasurement={updateWeeklyMeasurement}
+          onDeleteWeeklyMeasurement={deleteWeeklyMeasurement}
+        />
+      )}
       {tab === 'profile' && <ProfileScreen profile={state.profile} onSave={saveProfile} />}
 
       <button className="ghost" onClick={() => setState(localStateRepository.reset())}>
