@@ -110,9 +110,10 @@ export const localStateRepository = {
 
   addWeeklyMeasurement(entry: WeeklyMeasurement): DomainState {
     const current = storage.read();
+    const withoutSameDate = current.weeklyMeasurements.filter((item) => item.date !== entry.date);
     const next: DomainState = {
       ...current,
-      weeklyMeasurements: [...current.weeklyMeasurements, entry]
+      weeklyMeasurements: [...withoutSameDate, entry].sort((a, b) => a.date.localeCompare(b.date))
     };
     storage.write(next);
     return next;

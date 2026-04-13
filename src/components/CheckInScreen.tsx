@@ -1,16 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
-import { calculateAverageWeight7d } from '../domain/decision';
-import type { DailyWeightEntry, WeeklyCheckIn } from '../domain/types';
+import { calculateAverageWeight7d, getRecommendation } from '../domain/decision';
+import type { DailyWeightEntry, UserProfile, WeeklyCheckIn } from '../domain/types';
 
 interface CheckInScreenProps {
   onAddDaily(entry: DailyWeightEntry): void;
   onAddWeekly(entry: WeeklyCheckIn): void;
   dailyWeights: DailyWeightEntry[];
+  weeklyMeasurements: WeeklyCheckIn[];
+  profile: UserProfile;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function CheckInScreen({ onAddDaily, onAddWeekly, dailyWeights }: CheckInScreenProps) {
+export function CheckInScreen({
+  onAddDaily,
+  onAddWeekly,
+  dailyWeights,
+  weeklyMeasurements,
+  profile
+}: CheckInScreenProps) {
   const [dailyDate, setDailyDate] = useState(today());
   const [weightKg, setWeightKg] = useState(80);
   const [dailySuccessMessage, setDailySuccessMessage] = useState('');
@@ -18,10 +26,16 @@ export function CheckInScreen({ onAddDaily, onAddWeekly, dailyWeights }: CheckIn
   const [weeklyDate, setWeeklyDate] = useState(today());
   const [waistCm, setWaistCm] = useState(85);
   const [bodyFatPct, setBodyFatPct] = useState('');
+  const [weeklySuccessMessage, setWeeklySuccessMessage] = useState('');
 
   const existingDailyEntry = useMemo(
     () => dailyWeights.find((entry) => entry.date === dailyDate),
     [dailyDate, dailyWeights]
+  );
+
+  const existingWeeklyEntry = useMemo(
+    () => weeklyMeasurements.find((entry) => entry.date === weeklyDate),
+    [weeklyDate, weeklyMeasurements]
   );
 
   useEffect(() => {
@@ -30,9 +44,34 @@ export function CheckInScreen({ onAddDaily, onAddWeekly, dailyWeights }: CheckIn
     }
   }, [existingDailyEntry]);
 
+  useEffect(() => {
+    if (!existingWeeklyEntry) return;
+    setWaistCm(existingWeeklyEntry.waistCm);
+    setBodyFatPct(
+      typeof existingWeeklyEntry.bodyFatPct === 'number' ? existingWeeklyEntry.bodyFatPct.toString() : ''
+    );
+  }, [existingWeeklyEntry]);
+
   const recentAvgWeight7d = useMemo(() => {
     return calculateAverageWeight7d(dailyWeights.map((entry) => entry.weightKg));
   }, [dailyWeights]);
+
+  const projectedWeeklyStatus = useMemo(() => {
+    const nextEntry: WeeklyCheckIn = {
+      date: weeklyDate,
+      waistCm,
+      bodyFatPct: bodyFatPct ? Number(bodyFatPct) : undefined
+    };
+
+    const sanitizedWeekly = weeklyMeasurements.filter((entry) => entry.date !== weeklyDate);
+    const simulatedState = {
+      profile,
+      dailyWeights,
+      weeklyMeasurements: [...sanitizedWeekly, nextEntry].sort((a, b) => a.date.localeCompare(b.date))
+    };
+
+    return getRecommendation(simulatedState);
+  }, [bodyFatPct, dailyWeights, profile, waistCm, weeklyDate, weeklyMeasurements]);
 
   return (
     <section>
@@ -96,12 +135,23 @@ export function CheckInScreen({ onAddDaily, onAddWeekly, dailyWeights }: CheckIn
               waistCm,
               bodyFatPct: bodyFatPct ? Number(bodyFatPct) : undefined
             });
+            setWeeklySuccessMessage(
+              `Registro semanal salvo. Recomendação: ${projectedWeeklyStatus.recommendation} · Confiança: ${projectedWeeklyStatus.confidence}.`
+            );
           }}
         >
           <h2>Cintura semanal</h2>
           <label>
             Data
-            <input type="date" value={weeklyDate} onChange={(e) => setWeeklyDate(e.target.value)} required />
+            <input
+              type="date"
+              value={weeklyDate}
+              onChange={(e) => {
+                setWeeklyDate(e.target.value);
+                setWeeklySuccessMessage('');
+              }}
+              required
+            />
           </label>
           <label>
             Cintura (cm)
@@ -109,7 +159,10 @@ export function CheckInScreen({ onAddDaily, onAddWeekly, dailyWeights }: CheckIn
               type="number"
               step="0.1"
               value={waistCm}
-              onChange={(e) => setWaistCm(Number(e.target.value))}
+              onChange={(e) => {
+                setWaistCm(Number(e.target.value));
+                setWeeklySuccessMessage('');
+              }}
               required
             />
           </label>
@@ -119,10 +172,22 @@ export function CheckInScreen({ onAddDaily, onAddWeekly, dailyWeights }: CheckIn
               type="number"
               step="0.1"
               value={bodyFatPct}
-              onChange={(e) => setBodyFatPct(e.target.value)}
+              onChange={(e) => {
+                setBodyFatPct(e.target.value);
+                setWeeklySuccessMessage('');
+              }}
             />
           </label>
-          <button type="submit">Salvar cintura</button>
+          {existingWeeklyEntry ? (
+            <p className="muted">Já existe cintura nessa data. Salvar irá editar o registro semanal.</p>
+          ) : null}
+          <p className="muted">
+            Após salvar: <strong>{projectedWeeklyStatus.recommendation}</strong> · confiança{' '}
+            <strong>{projectedWeeklyStatus.confidence}</strong>
+            {projectedWeeklyStatus.whtr !== null ? ` · WHtR ${projectedWeeklyStatus.whtr.toFixed(2)}` : ''}
+          </p>
+          {weeklySuccessMessage ? <p className="success-feedback">{weeklySuccessMessage}</p> : null}
+          <button type="submit">{existingWeeklyEntry ? 'Atualizar cintura' : 'Salvar cintura'}</button>
         </form>
       </div>
     </section>
