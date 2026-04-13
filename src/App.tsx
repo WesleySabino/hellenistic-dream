@@ -85,6 +85,8 @@ export function App() {
           onAddDaily={addDailyWeight}
           onAddWeekly={addWeeklyCheckIn}
           dailyWeights={sortedState.dailyWeights}
+          weeklyMeasurements={sortedState.weeklyMeasurements}
+          profile={state.profile!}
         />
       )}
       {tab === 'history' && <HistoryScreen state={sortedState} />}
