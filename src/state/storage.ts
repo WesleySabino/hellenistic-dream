@@ -30,6 +30,88 @@ function normalizeState(raw: unknown): DomainState {
   };
 }
 
+function escapeCsv(value: string | number | undefined): string {
+  if (value === undefined) return '';
+  const stringified = String(value);
+  if (/[",\n]/.test(stringified)) {
+    return `"${stringified.replace(/"/g, '""')}"`;
+  }
+  return stringified;
+}
+
+function stateToCsv(state: DomainState): string {
+  const lines: string[] = ['type,date,weight_kg,waist_cm,body_fat_pct,note,name,sex,height_cm,current_goal'];
+
+  if (state.profile) {
+    lines.push(
+      [
+        'profile',
+        '',
+        '',
+        '',
+        '',
+        '',
+        escapeCsv(state.profile.name),
+        escapeCsv(state.profile.sex),
+        escapeCsv(state.profile.heightCm),
+        escapeCsv(state.profile.currentGoal)
+      ].join(',')
+    );
+  }
+
+  state.dailyWeights.forEach((entry) => {
+    lines.push(
+      [
+        'daily_weight',
+        escapeCsv(entry.date),
+        escapeCsv(entry.weightKg),
+        '',
+        '',
+        escapeCsv(entry.note),
+        '',
+        '',
+        '',
+        ''
+      ].join(',')
+    );
+  });
+
+  state.weeklyMeasurements.forEach((entry) => {
+    lines.push(
+      [
+        'weekly_measurement',
+        escapeCsv(entry.date),
+        '',
+        escapeCsv(entry.waistCm),
+        escapeCsv(entry.bodyFatPct),
+        escapeCsv(entry.note),
+        '',
+        '',
+        '',
+        ''
+      ].join(',')
+    );
+  });
+
+  return `${lines.join('\n')}\n`;
+}
+
+function validateImportedState(state: DomainState): boolean {
+  const hasValidProfile =
+    state.profile === null ||
+    (typeof state.profile.heightCm === 'number' && (state.profile.sex === 'male' || state.profile.sex === 'female'));
+
+  const hasValidDaily = state.dailyWeights.every(
+    (item) => typeof item.date === 'string' && typeof item.weightKg === 'number'
+  );
+
+  const hasValidWeekly = state.weeklyMeasurements.every(
+    (item) => typeof item.date === 'string' && typeof item.waistCm === 'number'
+  );
+
+  return hasValidProfile && hasValidDaily && hasValidWeekly;
+}
+
 class LocalStateStorage {
   private key: string;
 
@@ -69,6 +151,24 @@ export const localStateRepository = {
 
   saveState(state: DomainState): void {
     storage.write(state);
+  },
+
+  exportJson(): string {
+    return JSON.stringify(storage.read(), null, 2);
+  },
+
+  exportCsv(): string {
+    return stateToCsv(storage.read());
+  },
+
+  importBackup(rawState: unknown): DomainState {
+    const next = normalizeState(rawState);
+    if (!validateImportedState(next)) {
+      throw new Error('Arquivo de backup inválido.');
+    }
+
+    storage.write(next);
+    return next;
   },
 
   saveProfile(profile: Profile): DomainState {

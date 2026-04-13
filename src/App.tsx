@@ -10,6 +10,18 @@ import { localStateRepository } from './state/storage';
 
 type Tab = 'dashboard' | 'decision' | 'checkin' | 'history' | 'profile';
 
+function downloadFile(filename: string, content: string, mimeType: string): void {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
 export function App() {
   const [tab, setTab] = useState<Tab>('dashboard');
   const [state, setState] = useState(() => localStateRepository.getState());
@@ -69,6 +81,26 @@ export function App() {
     setTab('dashboard');
   };
 
+  const exportJson = () => {
+    downloadFile('hellenistic-dream-backup.json', localStateRepository.exportJson(), 'application/json;charset=utf-8');
+  };
+
+  const exportCsv = () => {
+    downloadFile('hellenistic-dream-backup.csv', localStateRepository.exportCsv(), 'text/csv;charset=utf-8');
+  };
+
+  const importBackup = async (file: File) => {
+    const text = await file.text();
+    const parsed = JSON.parse(text) as unknown;
+    setState(localStateRepository.importBackup(parsed));
+    setTab('dashboard');
+  };
+
+  const resetState = () => {
+    setState(localStateRepository.reset());
+    setTab('dashboard');
+  };
+
   const needsOnboarding = !state.profile || state.dailyWeights.length === 0 || state.weeklyMeasurements.length === 0;
 
   if (needsOnboarding) {
@@ -119,11 +151,16 @@ export function App() {
           onDeleteWeeklyMeasurement={deleteWeeklyMeasurement}
         />
       )}
-      {tab === 'profile' && <ProfileScreen profile={state.profile} onSave={saveProfile} />}
-
-      <button className="ghost" onClick={() => setState(localStateRepository.reset())}>
-        Limpar dados locais e reiniciar onboarding
-      </button>
+      {tab === 'profile' && (
+        <ProfileScreen
+          profile={state.profile}
+          onSave={saveProfile}
+          onExportJson={exportJson}
+          onExportCsv={exportCsv}
+          onImportBackup={importBackup}
+          onReset={resetState}
+        />
+      )}
     </main>
   );
 }
