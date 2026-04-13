@@ -1,5 +1,13 @@
 import type { CalculatedState, Confidence, DomainState, Recommendation, Sex, Trend } from './types';
 
+const fullRuleDescription = [
+  '1) Calculamos o WHtR = cintura (cm) / altura (cm).',
+  '2) Se WHtR for 0,50 ou mais, a recomendação é CUT.',
+  '3) Se WHtR for menor que 0,40, a recomendação é BULK.',
+  '4) Se WHtR ficar entre 0,40 e 0,49, usamos gordura corporal quando estiver disponível.',
+  '5) Na faixa intermediária sem gordura corporal informada, a recomendação é LIVRE ESCOLHA.'
+];
+
 export function decideByBodyFat(sex: Sex, bodyFatPct: number): Recommendation {
   if (sex === 'male') {
     if (bodyFatPct >= 20) return 'CUT';
@@ -64,6 +72,8 @@ export function getRecommendation(state: DomainState): CalculatedState {
         'Sem perfil completo ou sem medição semanal de cintura ainda não existe leitura confiável.',
         'A recomendação fica neutra até que você registre mais dados.'
       ],
+      appliedRule: 'Dados insuficientes para aplicar a regra principal com confiança.',
+      fullRule: fullRuleDescription,
       whtr: null,
       confidence,
       avgWeight7d,
@@ -86,6 +96,7 @@ export function getRecommendation(state: DomainState): CalculatedState {
 
   let reason = '';
   let explanation: string[] = [];
+  let appliedRule = '';
 
   if (recommendation === 'CUT' && whtr >= 0.5) {
     reason = 'Sua cintura está acima da zona considerada confortável em relação à sua altura.';
@@ -93,12 +104,14 @@ export function getRecommendation(state: DomainState): CalculatedState {
       'A razão cintura/altura (WHtR) ficou em 0,50 ou mais.',
       'Pela regra principal, nessa faixa a melhor direção é reduzir gordura antes de ganhar mais peso.'
     ];
+    appliedRule = 'Regra principal: WHtR >= 0,50 -> CUT.';
   } else if (recommendation === 'BULK' && whtr < 0.4) {
     reason = 'Sua relação cintura/altura está em faixa baixa para priorizar ganho de massa.';
     explanation = [
       'A razão cintura/altura (WHtR) ficou abaixo de 0,40.',
       'Pela regra principal, nessa faixa aumentar massa é uma direção possível.'
     ];
+    appliedRule = 'Regra principal: WHtR < 0,40 -> BULK.';
   } else if (usedBodyFat) {
     reason =
       recommendation === 'LIVRE ESCOLHA'
@@ -108,6 +121,7 @@ export function getRecommendation(state: DomainState): CalculatedState {
       'Seu WHtR ficou entre 0,40 e 0,49.',
       'Nessa faixa intermediária, o sistema usa o percentual de gordura para decidir.'
     ];
+    appliedRule = 'Regra intermediária: WHtR entre 0,40 e 0,49 com gordura corporal.';
   } else {
     reason =
       'Seus indicadores estão em faixa intermediária e sem gordura corporal recente. A direção está livre para decidir com seu treinador.';
@@ -115,12 +129,15 @@ export function getRecommendation(state: DomainState): CalculatedState {
       'Seu WHtR ficou entre 0,40 e 0,49.',
       'Sem percentual de gordura recente, a classificação padrão é LIVRE ESCOLHA.'
     ];
+    appliedRule = 'Regra intermediária sem gordura corporal: LIVRE ESCOLHA.';
   }
 
   return {
     recommendation,
     reason,
     explanation,
+    appliedRule,
+    fullRule: fullRuleDescription,
     whtr,
     confidence,
     avgWeight7d,
