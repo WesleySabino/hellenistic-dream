@@ -38,6 +38,8 @@ export interface CalculatedState {
   recommendation: Recommendation;
   reason: string;
   explanation: string[];
+  appliedRule: string;
+  fullRule: string[];
   confidence: Confidence;
   whtr: number | null;
   avgWeight7d: number | null;

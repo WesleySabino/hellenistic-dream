@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { CheckInScreen } from './components/CheckInScreen';
 import { Dashboard } from './components/Dashboard';
+import { DecisionScreen } from './components/DecisionScreen';
 import { HistoryScreen } from './components/HistoryScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import type { DailyWeightEntry, UserProfile, WeeklyCheckIn } from './domain/types';
 import { localStateRepository } from './state/storage';
 
-type Tab = 'dashboard' | 'checkin' | 'history' | 'profile';
+type Tab = 'dashboard' | 'decision' | 'checkin' | 'history' | 'profile';
 
 export function App() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -68,6 +69,9 @@ export function App() {
         <button onClick={() => setTab('dashboard')} className={tab === 'dashboard' ? 'active' : ''}>
           Dashboard
         </button>
+        <button onClick={() => setTab('decision')} className={tab === 'decision' ? 'active' : ''}>
+          Como decidiu
+        </button>
         <button onClick={() => setTab('checkin')} className={tab === 'checkin' ? 'active' : ''}>
           Check-in
         </button>
@@ -80,6 +84,7 @@ export function App() {
       </nav>
 
       {tab === 'dashboard' && <Dashboard state={sortedState} />}
+      {tab === 'decision' && <DecisionScreen state={sortedState} />}
       {tab === 'checkin' && (
         <CheckInScreen
           onAddDaily={addDailyWeight}
